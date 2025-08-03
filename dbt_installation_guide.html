@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Installation Guide - Engineering</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .progress-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .progress-counter {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            background: #f1f5f9;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-status {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .steps-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .step {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .step-header {
+            padding: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .step-header:hover {
+            background: #f4f4f5;
+        }
+
+        .step-header.completed {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border-bottom-color: #bbf7d0;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: #f1f5f9;
+            color: #475569;
+            transition: all 0.3s ease;
+        }
+
+        .step-header.completed .step-number {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-title-section {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .step-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .step-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .expand-icon {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            transition: transform 0.3s ease;
+        }
+
+        .step.active .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .step-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active .step-content {
+            max-height: 2000px;
+        }
+
+        .step-body {
+            padding: 32px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .step-description {
+            color: #475569;
+            margin-bottom: 24px;
+            font-size: 1rem;
+        }
+
+        .subsection {
+            margin-bottom: 28px;
+        }
+
+        .subsection-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subsection-number {
+            background: #3b82f6;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            position: relative;
+            margin: 16px 0;
+            font-family: 'SFMono-Regular', 'Monaco', 'Cascadia Code', 'Roboto Mono', monospace;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: #334155;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #475569;
+        }
+
+        .code-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .code-content {
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-warning {
+            background: #fefce8;
+            border-color: #eab308;
+            color: #713f12;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-list {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        .instructions-list h4 {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .instructions-list ol {
+            margin-left: 20px;
+        }
+
+        .instructions-list li {
+            margin-bottom: 8px;
+            color: #475569;
+        }
+
+        .instructions-list code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SFMono-Regular', monospace;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .complete-section {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .complete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .complete-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .completion-message {
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+            border: 1px solid #bbf7d0;
+            color: #065f46;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 32px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .completion-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .header {
+                padding: 40px 24px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .step-header {
+                padding: 20px;
+            }
+            
+            .step-body {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1>dbt Installation Guide</h1>
+                <p>Complete setup guide for dbt with BigQuery integration</p>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-header">
+                <div class="progress-title">Installation Progress</div>
+                <div class="progress-counter" id="progressCounter">0 of 5 completed</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-status" id="progressStatus">Get started by completing the prerequisites</div>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step" id="step1">
+                <div class="step-header" onclick="toggleStep(1)">
+                    <div class="step-number">1</div>
+                    <div class="step-title-section">
+                        <div class="step-title">Prerequisites Setup</div>
+                        <div class="step-subtitle">Install VS Code development environment</div>
+                    </div>
+                    <div class="step-status">
+                        <div class="status-badge status-pending" id="status1">Pending</div>
+                        <div class="expand-icon">▶</div>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="step-body">
+                        <div class="alert alert-info">
+                            <div class="alert-title">🔧 Prerequisites Required</div>
+                            Before setting up dbt, ensure you have VS Code installed as your development environment.
+                        </div>
+                        
+                        <div class="step-description">
+                            Visual Studio Code is the recommended editor for dbt development. It provides excellent syntax highlighting, extensions, and debugging capabilities for data transformation workflows.
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">1</div>
+                                Download VS Code
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Download Link</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'https://code.visualstudio.com/download')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>https://code.visualstudio.com/download</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="instructions-list">
+                            <h4>Installation Steps:</h4>
+                            <ol>
+                                <li>Navigate to the download link above</li>
+                                <li>Select the appropriate version for your operating system</li>
+                                <li>Download and run the installer</li>
+                                <li>Follow the installation wizard with default settings</li>
+                                <li>Launch VS Code to verify successful installation</li>
+                            </ol>
+                        </div>
+
+                        <div class="complete-section">
+                            <button class="complete-btn" onclick="completeStep(1)">
+                                <span>Mark as Complete</span>
+                                <span>✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step2">
+                <div class="step-header" onclick="toggleStep(2)">
+                    <div class="step-number">2</div>
+                    <div class="step-title-section">
+                        <div class="step-title">Clone Repository</div>
+                        <div class="step-subtitle">Get the dags-bi-eng repository</div>
+                    </div>
+                    <div class="step-status">
+                        <div class="status-badge status-pending" id="status2">Pending</div>
+                        <div class="expand-icon">▶</div>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="step-body">
+                        <div class="step-description">
+                            Clone the organizational repository containing all dbt configurations, models, and dependencies required for your data transformation workflows.
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">1</div>
+                                Clone Command
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Terminal Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'git clone https://github.com/outbrain/dags-bi-eng')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>git clone https://github.com/outbrain/dags-bi-eng</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="instructions-list">
+                            <h4>Execution Steps:</h4>
+                            <ol>
+                                <li>Open Terminal (macOS/Linux) or Command Prompt (Windows)</li>
+                                <li>Navigate to your desired project directory</li>
+                                <li>Execute the clone command above</li>
+                                <li>Wait for the cloning process to complete</li>
+                                <li>Open the new <code>dags-bi-eng</code> folder in VS Code</li>
+                            </ol>
+                        </div>
+
+                        <div class="complete-section">
+                            <button class="complete-btn" onclick="completeStep(2)">
+                                <span>Mark as Complete</span>
+                                <span>✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step3">
+                <div class="step-header" onclick="toggleStep(3)">
+                    <div class="step-number">3</div>
+                    <div class="step-title-section">
+                        <div class="step-title">Virtual Environment</div>
+                        <div class="step-subtitle">Create and configure dbt_venv</div>
+                    </div>
+                    <div class="step-status">
+                        <div class="status-badge status-pending" id="status3">Pending</div>
+                        <div class="expand-icon">▶</div>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="step-body">
+                        <div class="step-description">
+                            Create an isolated Python environment to manage dbt dependencies without conflicts with other projects or system packages.
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">1</div>
+                                Create Virtual Environment
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Python Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'python3 -m venv dbt_venv')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>python3 -m venv dbt_venv</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">2</div>
+                                Activate Environment
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Activation Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'source dbt_venv/bin/activate')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>source dbt_venv/bin/activate</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">3</div>
+                                Install Dependencies
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Package Installation</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'pip install -r requirements.txt')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>pip install -r requirements.txt</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="instructions-list">
+                            <h4>Execution Workflow:</h4>
+                            <ol>
+                                <li>Ensure you're in the <code>dags-bi-eng</code> project directory</li>
+                                <li>Run the first command to create the virtual environment</li>
+                                <li>Activate the environment using the second command</li>
+                                <li>Install all required packages with the third command</li>
+                                <li>Verify installation completed without errors</li>
+                            </ol>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <div class="alert-title">💡 Pro Tip</div>
+                            Your terminal prompt should show <code>(dbt_venv)</code> when the virtual environment is active.
+                        </div>
+
+                        <div class="complete-section">
+                            <button class="complete-btn" onclick="completeStep(3)">
+                                <span>Mark as Complete</span>
+                                <span>✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step4">
+                <div class="step-header" onclick="toggleStep(4)">
+                    <div class="step-number">4</div>
+                    <div class="step-title-section">
+                        <div class="step-title">BigQuery Configuration</div>
+                        <div class="step-subtitle">Setup Google Cloud authentication</div>
+                    </div>
+                    <div class="step-status">
+                        <div class="status-badge status-pending" id="status4">Pending</div>
+                        <div class="expand-icon">▶</div>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="step-body">
+                        <div class="step-description">
+                            Configure dbt to work with BigQuery by installing Google Cloud CLI and setting up appropriate authentication credentials.
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">1</div>
+                                Install Google Cloud CLI
+                            </div>
+                            <div class="step-description">
+                                Verify that the gcloud command is available on your system. If not installed, download from the link below:
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Download Link</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'https://cloud.google.com/sdk/docs/install')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>https://cloud.google.com/sdk/docs/install</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <div class="alert-title">🔍 Hardware Detection</div>
+                                To determine your machine architecture, run: <code>uname -m</code>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">2</div>
+                                Authenticate with Google Cloud
+                            </div>
+                            <div class="step-description">
+                                Set up application-default credentials with the required scopes for BigQuery access:
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Authentication Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'gcloud auth application-default login --scopes=https://www.googleapis.com/auth/bigquery,https://www.googleapis.com/auth/drive.readonly,https://www.googleapis.com/auth/iam.test')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>gcloud auth application-default login \
+--scopes=https://www.googleapis.com/auth/bigquery,\
+https://www.googleapis.com/auth/drive.readonly,\
+https://www.googleapis.com/auth/iam.test</pre>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <div class="alert-title">⚠️ Important Note</div>
+                                Remove all spaces from the command when copying to your terminal for proper execution.
+                            </div>
+                        </div>
+
+                        <div class="instructions-list">
+                            <h4>Authentication Workflow:</h4>
+                            <ol>
+                                <li>Verify gcloud is installed: <code>gcloud --version</code></li>
+                                <li>Execute the authentication command above</li>
+                                <li>Browser will open for Google account verification</li>
+                                <li>Sign in with your authorized organizational Google account</li>
+                                <li>Confirm successful authentication message</li>
+                                <li>Verify setup with: <code>gcloud auth list</code></li>
+                            </ol>
+                        </div>
+
+                        <div class="complete-section">
+                            <button class="complete-btn" onclick="completeStep(4)">
+                                <span>Mark as Complete</span>
+                                <span>✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step" id="step5">
+                <div class="step-header" onclick="toggleStep(5)">
+                    <div class="step-number">5</div>
+                    <div class="step-title-section">
+                        <div class="step-title">dbt Project Setup</div>
+                        <div class="step-subtitle">Install dbt and initialize project</div>
+                    </div>
+                    <div class="step-status">
+                        <div class="status-badge status-pending" id="status5">Pending</div>
+                        <div class="expand-icon">▶</div>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="step-body">
+                        <div class="step-description">
+                            Install dbt-core with BigQuery adapter and initialize your dbt project with the proper configuration for your data warehouse connection.
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">1</div>
+                                Install dbt with BigQuery Support
+                            </div>
+                            <div class="step-description">
+                                Follow the official dbt documentation for BigQuery setup:
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Official Documentation</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'https://docs.getdbt.com/docs/core/connect-data-platform/bigquery-setup')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>https://docs.getdbt.com/docs/core/connect-data-platform/bigquery-setup</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Install Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'pip install dbt-bigquery')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>pip install dbt-bigquery</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">2</div>
+                                Initialize dbt Project
+                            </div>
+                            <div class="step-description">
+                                Initialize your dbt project using the official init command:
+                            </div>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Init Documentation</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'https://docs.getdbt.com/reference/commands/init')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>https://docs.getdbt.com/reference/commands/init</pre>
+                                </div>
+                            </div>
+                            
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Initialization Command</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, 'dbt init')">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>dbt init</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <div class="alert-title">📋 dbt init Configuration Prompts</div>
+                            When you run <code>dbt init</code>, follow these exact inputs to match the organizational configuration:
+                        </div>
+
+                        <div class="subsection">
+                            <div class="subsection-title">
+                                <div class="subsection-number">3</div>
+                                Configure dbt init Prompts
+                            </div>
+                            
+                            <div class="instructions-list">
+                                <h4>Answer the prompts as follows:</h4>
+                                <ol>
+                                    <li><strong>Project name:</strong> <code>dbt_bi</code></li>
+                                    <li><strong>Database (adapter):</strong> Select <code>bigquery</code> from the list</li>
+                                    <li><strong>Authentication method:</strong> Select <code>oauth</code></li>
+                                    <li><strong>Project ID:</strong> <code>bg-outbrain-bi</code></li>
+                                    <li><strong>Dataset (schema):</strong> <code>mart_dev</code></li>
+                                    <li><strong>Threads:</strong> <code>64</code></li>
+                                    <li><strong>Job timeout (seconds):</strong> <code>3000</code></li>
+                                    <li><strong>Location:</strong> <code>US</code></li>
+                                    <li><strong>Priority:</strong> <code>interactive</code></li>
+                                </ol>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <div class="alert-title">⚠️ Expected Output</div>
+                                After completing the configuration, your <code>profiles.yml</code> should contain the following structure:
+                            </div>
+
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <div class="code-label">Expected profiles.yml Configuration</div>
+                                    <button class="copy-btn" onclick="copyToClipboard(this, `dbt_bi:
+  outputs:
+    dev:
+      database: bg-outbrain-bi
+      location: US
+      method: oauth
+      priority: interactive
+      schema: mart_dev
+      threads: 64
+      timeout_seconds: 3000
+      type: bigquery
+  target: dev`)">Copy</button>
+                                </div>
+                                <div class="code-content">
+                                    <pre>dbt_bi:
+  outputs:
+    dev:
+      database: bg-outbrain-bi
+      location: US
+      method: oauth
+      priority: interactive
+      schema: mart_dev
+      threads: 64
+      timeout_seconds: 3000
+      type: bigquery
+  target: dev</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="instructions-list">
+                            <h4>Setup Workflow:</h4>
+                            <ol>
+                                <li>Ensure your virtual environment is still active: <code>(dbt_venv)</code></li>
+                                <li>Install dbt with BigQuery adapter using the command above</li>
+                                <li>Navigate to your project directory if not already there</li>
+                                <li>Run <code>dbt init</code> to start the configuration wizard</li>
+                                <li>Follow the configuration prompts exactly as specified above</li>
+                                <li>Verify your <code>profiles.yml</code> matches the expected output</li>
+                                <li>Test the connection with: <code>dbt debug</code></li>
+                            </ol>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <div class="alert-title">🔍 Verification</div>
+                            After setup, you can verify your configuration by running <code>dbt debug</code> to ensure all connections are working properly.
+                        </div>
+
+                        <div class="complete-section">
+                            <button class="complete-btn" onclick="completeStep(5)">
+                                <span>Mark as Complete</span>
+                                <span>✓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="completion-message" id="completionMessage">
+            🎉 Congratulations! You have successfully completed the dbt installation setup. Your development environment is now ready for data transformation workflows.
+        </div>
+    </div>
+
+    <script>
+        let completedSteps = 0;
+        const totalSteps = 5;
+
+        function toggleStep(stepNumber) {
+            const step = document.getElementById(`step${stepNumber}`);
+            const isActive = step.classList.contains('active');
+            
+            // Close all other steps
+            for (let i = 1; i <= totalSteps; i++) {
+                document.getElementById(`step${i}`).classList.remove('active');
+            }
+            
+            // Toggle current step
+            if (!isActive) {
+                step.classList.add('active');
+            }
+        }
+
+        function completeStep(stepNumber) {
+            const step = document.getElementById(`step${stepNumber}`);
+            const header = step.querySelector('.step-header');
+            const status = document.getElementById(`status${stepNumber}`);
+            const btn = step.querySelector('.complete-btn');
+            
+            if (!header.classList.contains('completed')) {
+                header.classList.add('completed');
+                status.textContent = 'Completed';
+                status.className = 'status-badge status-completed';
+                btn.innerHTML = '<span>Completed</span><span>✓</span>';
+                btn.disabled = true;
+                
+                // Update step number to checkmark
+                const stepNumber_elem = step.querySelector('.step-number');
+                stepNumber_elem.innerHTML = '✓';
+                
+                completedSteps++;
+                updateProgress();
+                
+                // Auto-open next step
+                if (stepNumber < totalSteps) {
+                    setTimeout(() => {
+                        toggleStep(stepNumber + 1);
+                    }, 500);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const progressCounter = document.getElementById('progressCounter');
+            const progressStatus = document.getElementById('progressStatus');
+            
+            const percentage = (completedSteps / totalSteps) * 100;
+            progressFill.style.width = percentage + '%';
+            progressCounter.textContent = `${completedSteps} of ${totalSteps} completed`;
+            
+            if (completedSteps === 0) {
+                progressStatus.textContent = 'Get started by completing the prerequisites';
+            } else if (completedSteps === totalSteps) {
+                progressStatus.textContent = 'Setup completed successfully!';
+                document.getElementById('completionMessage').classList.add('show');
+            } else {
+                progressStatus.textContent = `${totalSteps - completedSteps} steps remaining`;
+            }
+        }
+
+        function copyToClipboard(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        // Auto-open first step on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleStep(1);
+        });
+    </script>
+</body>
+</html>
